@@ -14,4 +14,55 @@
 // The AJAX returns the following JSON structure: {"content": string}
 
 
+window.onload = function (e) {
+    renderResults();
+}
+
+function renderResults() {
+    var dictionary = [];
+    dictionary.push({key: 1, value: "one"});
+    dictionary.push({key: 2, value: "two"});
+    dictionary.push({key: 3, value: "three"});
+    dictionary.push({key: 4, value: "four"});
+
+    for (let i = 0; i < dictionary.length; i++) {
+        //console.log(dictionary[i].key+' '+ dictionary[i].value);
+        makeRequest('box ' + dictionary[i].value, 'http://www.coincap.io/coins');//'https://jstest.getsandbox.com/' + dictionary[i].key);
+    }
+}
+
+
+function makeRequest(box, url) {
+
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.setRequestHeader('Content-Type', 'application/json');
+
+    //Assynchronous not working
+    // request.onload = function () {
+
+    //Synchronous Working
+    request.onreadystatechange = function() {
+        console.log(request.status);
+            if (request.status >= 200 && request.status < 400) {
+                // Success!
+                var resp = request.responseText;
+                console.log(resp);
+                var toRender = JSON.parse(resp);
+                console.log(toRender);
+            } else {
+                // We reached our target server, but it returned an error
+
+            }
+        };
+
+    request.onerror = function () {
+        console.log(request.statusText);
+    };
+
+    request.send();
+}
+
+
+
 
