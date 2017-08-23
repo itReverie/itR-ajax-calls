@@ -18,8 +18,6 @@
 //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests
 //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
 
-const DONE = 4;
-const SUCCESS = 200;
 const progressBar = document.getElementById("progress-bar");
 
 window.onload = function (e) {
@@ -27,48 +25,67 @@ window.onload = function (e) {
 }
 
 function loadContent() {
-    let dictionaryContent=[];
 
-    var dictionary = [];
-    dictionary.push({key: 1, value: "one"});
-    dictionary.push({key: 2, value: "two"});
-    dictionary.push({key: 3, value: "three"});
-    dictionary.push({key: 4, value: "four"});
+    let myPromise = new Promise(function (resolve, reject) {
+        let dictionaryContent = [];
+        var dictionary = [];
+        dictionary.push({key: 1, value: "one"});
+        dictionary.push({key: 2, value: "two"});
+        dictionary.push({key: 3, value: "three"});
+        dictionary.push({key: 4, value: "four"});
 
-    for (let i = 0; i < dictionary.length; i++) {
-        //console.log(dictionary[i].key+' '+ dictionary[i].value);
-          var result=  getContent(dictionary[i]);
+        for (let i = 0; i < dictionary.length; i++) {
+            getContent(dictionary[i].value)
+                .then(r => {
+                    dictionaryContent.push({key:dictionary[i].value, value:r});
+                    if(dictionaryContent.length===4){
+                        resolve(dictionaryContent);
+                    }
+                })
+                .catch(function (error) {
+                    reject(console.log('J: ' + error))
+                });
+        }
+    });
+
+    myPromise.then(r=>renderBoxes(r));
+
+}
+
+function renderBoxes(dictionaryContent){
+
+    for (var key in dictionaryContent) {
+        console.log(dictionaryContent[key].key +' '+dictionaryContent[key].value);
+        document.getElementsByClassName('box ' + dictionaryContent[key].key)[0].innerHTML = dictionaryContent[key].value;
     }
-
-    console.log(result);
 }
 
 
-function getContent(item)
-{
-    return new Promise(function(resolve, reject) {
-        makeRequest('http://jstest.getsandbox.com/' + item.value)
-            .catch(function (error) {reject(console.log('E: ' + error))})
-            .then((response) => {resolve(this.readJson(response))})
-            .catch(function (error) {reject(console.log('J: ' + error))});
+function getContent(boxName) {
+    return new Promise(function (resolve, reject) {
+        makeRequest('http://jstest.getsandbox.com/' + boxName)
+            .catch(function (error) {
+                reject(console.log('E: ' + error))
+            })
+            .then(response => resolve(this.readJson(response)))
+            .catch(function (error) {
+                reject(console.log('J: ' + error))
+            });
     });
 }
 
 function readJson(resp) {
-
     //I am stringifing because i was having a non valid Json error
     var respToString = JSON.stringify(resp);
     //RESULT in Json. I am making double parsing as it seems there is a bug with the json.parse
     var respTojson = JSON.parse(JSON.parse(respToString));
     //console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
-    //document.getElementsByClassName('box ' + item.value)[0].innerHTML = respTojson.content;
-
     return respTojson.content;
 }
 
 
 //Assynchronous
-function requestProgress (e) {
+function requestProgress(e) {
     //console.log(e.lengthComputable);
 
     if (e.lengthComputable) {
@@ -96,21 +113,19 @@ function requestProgress (e) {
 
 }
 
-function onLoadStart()
-{
+function onLoadStart() {
     progressBar.innerHTML = 0;
 }
-function onLoadEnd(e)
-{
+
+function onLoadEnd(e) {
     progressBar.innerHTML = e.loaded;
 
 
 }
 
 
-
 function makeRequest(url) {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
         let request = new XMLHttpRequest();
         request.onload = function () {
             if (this.status >= 200 && this.status < 300) {
