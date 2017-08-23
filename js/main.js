@@ -35,7 +35,8 @@ function loadContent() {
 
     for (let i = 0; i < dictionary.length; i++) {
         //console.log(dictionary[i].key+' '+ dictionary[i].value);
-        makeRequest('http://jstest.getsandbox.com/'+dictionary[i].value, myCallback, dictionary[i])
+        var result=makeRequest('http://jstest.getsandbox.com/'+dictionary[i].value, myCallback, dictionary[i])
+        //console.log(result);
     }
 }
 
@@ -48,6 +49,7 @@ function myCallback(item) {
     var respTojson = JSON.parse(JSON.parse(respToString));
     //console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
     document.getElementsByClassName('box ' + item.value)[0].innerHTML = respTojson.content;
+    return respTojson.content;
 }
 
 
@@ -81,7 +83,7 @@ function requestProgress (e) {
     // } else {
     //     contentLength = e.target.getResponseHeader('x-decompressed-content-length');
     // }
-    // console.log( contentLength);
+    //  progressIndicator.update(e.loaded / contentLength);
 
     //OPTION 1
     // if (this.status === 200) {
@@ -100,6 +102,8 @@ function onLoadStart()
 function onLoadEnd(e)
 {
     progressBar.innerHTML = e.loaded;
+
+
 }
 
 
@@ -116,6 +120,7 @@ function makeRequest(url, callback) {
     request.onloadend = onLoadEnd;
     request.open('GET', url, true);
     request.send();
+
 }
 
 
