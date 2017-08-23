@@ -27,6 +27,8 @@ window.onload = function (e) {
 }
 
 function loadContent() {
+    let dictionaryContent=[];
+
     var dictionary = [];
     dictionary.push({key: 1, value: "one"});
     dictionary.push({key: 2, value: "two"});
@@ -35,53 +37,37 @@ function loadContent() {
 
     for (let i = 0; i < dictionary.length; i++) {
         //console.log(dictionary[i].key+' '+ dictionary[i].value);
-        makeRequest('http://jstest.getsandbox.com/'+dictionary[i].value)
-            .catch(function(error) { console.log('E: '+error); })
-            .then(JSON.stringify)
-            .catch(function(error) { throw new JSONError('J0: '+error); })
-            .then(JSON.parse)
-            .catch(function(error) { throw new JSONError('J1: '+error); })
-            .then(JSON.parse)
-            .catch(function(error) { throw new JSONError('J2: '+error); })
-            .then((r) => this.gettingContent(r,dictionary[i] ) )
-            .catch(function(error) { console.log('A: '+error);});
-
-        //console.log(result);
+          var result=  getContent(dictionary[i]);
     }
+
+    console.log(result);
 }
 
 
-function gettingContent(respTojson, item) {
+function getContent(item)
+{
+    return new Promise(function(resolve, reject) {
+        makeRequest('http://jstest.getsandbox.com/' + item.value)
+            .catch(function (error) {reject(console.log('E: ' + error))})
+            .then((response) => {resolve(this.readJson(response))})
+            .catch(function (error) {reject(console.log('J: ' + error))});
+    });
+}
+
+function readJson(resp) {
 
     //I am stringifing because i was having a non valid Json error
-    // var respToString = JSON.stringify(resp);
+    var respToString = JSON.stringify(resp);
     //RESULT in Json. I am making double parsing as it seems there is a bug with the json.parse
-    //var respTojson = JSON.parse(JSON.parse(respToString));
+    var respTojson = JSON.parse(JSON.parse(respToString));
     //console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
-    document.getElementsByClassName('box ' + item.value)[0].innerHTML = respTojson.content;
+    //document.getElementsByClassName('box ' + item.value)[0].innerHTML = respTojson.content;
 
     return respTojson.content;
 }
 
 
 //Assynchronous
-// function requestCompleted() {
-//     //console.log(this.arguments)
-//     if (this.readyState === DONE) {
-//         if (this.status === SUCCESS) {
-//             this.callback.apply(this, this.arguments);
-//         }
-//     }
-// }
-//
-// function requestError(reject) {
-//     console.log(this.statusText);
-//     reject({
-//         status: this.status,
-//         statusText: this.statusText
-//     });
-// }
-
 function requestProgress (e) {
     //console.log(e.lengthComputable);
 
@@ -124,20 +110,11 @@ function onLoadEnd(e)
 
 
 function makeRequest(url) {
-
     return new Promise(function(resolve, reject) {
         let request = new XMLHttpRequest();
-        //request.callback = callback;
-        //request.arguments = Array.prototype.slice.call(arguments, 2);
         request.onload = function () {
             if (this.status >= 200 && this.status < 300) {
-                var resp = this.responseText;
-                //I am stringifing because i was having a non valid Json error
-                var respToString = JSON.stringify(resp);
-                //RESULT in Json. I am making double parsing as it seems there is a bug with the json.parse
-                var respTojson = JSON.parse(JSON.parse(respToString));
-                console.log(respTojson);
-                resolve(resp);
+                resolve(this.responseText);
             } else {
                 reject({
                     status: this.status,
@@ -151,8 +128,6 @@ function makeRequest(url) {
                 statusText: request.statusText
             });
         };
-
-
         request.onprogress = requestProgress;
         request.onloadstart = onLoadStart;
         request.onloadend = onLoadEnd;
