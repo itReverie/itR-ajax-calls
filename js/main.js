@@ -50,7 +50,7 @@ function loadContent() {
 
 function getContentPerBox(boxName) {
     return new Promise(function (resolve, reject) {
-        makeRequest('http://jstest.getsandbox.com/' + boxName)
+        makeRequest('http://jstest.getsandbox.com/' + boxName, 'GET', null)
             .catch(function (error) {
                 reject(console.log('E: ' + error))
             })
@@ -73,7 +73,6 @@ function readJson(resp) {
     var respToString = JSON.stringify(resp);
     //RESULT in Json. I am making double parsing as it seems there is a bug with the json.parse
     var respTojson = JSON.parse(JSON.parse(respToString));
-    //console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
     return respTojson.content;
 }
 
@@ -113,13 +112,12 @@ function onLoadStart() {
 
 function onLoadEnd(e) {
     progressBar.innerHTML = e.loaded;
-
-
 }
 
-function makeRequest(url) {
+function makeRequest(url, method, params) {
     return new Promise(function (resolve, reject) {
         let request = new XMLHttpRequest();
+        //request.setRequestHeader("Content-type", "application/json");
         request.onload = function () {
             if (this.status >= 200 && this.status < 300) {
                 resolve(this.responseText);
@@ -139,8 +137,8 @@ function makeRequest(url) {
         request.onprogress = requestProgress;
         request.onloadstart = onLoadStart;
         request.onloadend = onLoadEnd;
-        request.open('GET', url, true);
-        request.send();
+        request.open(method, url, true);
+        request.send(params);
     });
 }
 
