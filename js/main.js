@@ -117,7 +117,7 @@ function onLoadEnd(e) {
 function makeRequest(url, method, params) {
     return new Promise(function (resolve, reject) {
         let request = new XMLHttpRequest();
-        //request.setRequestHeader("Content-type", "application/json");
+       //request.setRequestHeader("Content-type", "application/json");
         request.onload = function () {
             if (this.status >= 200 && this.status < 300) {
                 resolve(this.responseText);

@@ -1,0 +1,48 @@
+html {
+  font-size: 10px; }
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  margin: 4rem auto;
+  width: 60rem; }
+
+p {
+  text-align: center; }
+
+#progress-bar {
+  background: #bdc3c7;
+  border-radius: 1.5rem;
+  height: 3rem;
+  margin-bottom: 2rem;
+  position: relative; }
+  #progress-bar:after {
+    background: #2980b9;
+    border-radius: 1.5rem;
+    content: '';
+    display: block;
+    height: 3rem;
+    position: absolute; }
+  #progress-bar.progress-25:after {
+    width: 25%; }
+  #progress-bar.progress-50:after {
+    width: 50%; }
+  #progress-bar.progress-75:after {
+    width: 75%; }
+  #progress-bar.progress-100:after {
+    width: 100%; }
+
+.row {
+  display: flex;
+  margin: 0 -1rem; }
+
+.box {
+  align-items: center;
+  background: #ecf0f1;
+  display: flex;
+  height: 20rem;
+  justify-content: center;
+  margin: 1rem;
+  width: 50%; }
+
+/*# sourceMappingURL=main.css.map */
