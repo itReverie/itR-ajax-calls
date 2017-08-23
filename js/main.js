@@ -12,62 +12,62 @@
 // Box four:  https://jstest.getsandbox.com/four
 //
 // The AJAX returns the following JSON structure: {"content": string}
-
+//const myUrl = 'http://jstest.getsandbox.com/one';
+//const myUrl='http://www.coincap.io/coins';
 
 window.onload = function (e) {
-    renderResults();
+    loadContent();
 }
 
-function renderResults() {
+function loadContent() {
     var dictionary = [];
     dictionary.push({key: 1, value: "one"});
     dictionary.push({key: 2, value: "two"});
     dictionary.push({key: 3, value: "three"});
     dictionary.push({key: 4, value: "four"});
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < dictionary.length; i++) {
         //console.log(dictionary[i].key+' '+ dictionary[i].value);
-        makeRequest('box ' + dictionary[i].value, 'http://www.coincap.io/coins');//'https://jstest.getsandbox.com/' + dictionary[i].key);
+        makeRequest('http://jstest.getsandbox.com/'+dictionary[i].value, myCallback, dictionary[i])
     }
 }
 
-function reqListener() {
+
+function myCallback(item) {
     var resp = this.responseText;
+    //I am stringifing because i was having a non valid Json error
     var respToString = JSON.stringify(resp);
     //RESULT in Json
-    var respTojson = JSON.parse(respToString);
-    console.log(respTojson);
+    var respTojson = JSON.parse(JSON.parse(respToString));
+    console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
+
+    document.getElementsByClassName('box ' + item.value)[0].innerHTML = respTojson.content;
+
 }
 
-function makeRequest(box, url) {
+
+//Assynchronous
+function requestSuccess() {
+    //console.log(this.arguments)
+    this.callback.apply(this, this.arguments);
+}
+
+function requestError() {
+    console.log(this.statusText);
+}
+
+function makeRequest(url, callback) {
 
     var request = new XMLHttpRequest();
+    request.callback = callback;
+    request.arguments = Array.prototype.slice.call(arguments, 2);
+    request.onload = requestSuccess;
+    request.onerror = requestError;
     request.open('GET', url, true);
-    //request.setRequestHeader('Content-Type', 'application/json');
-
-    //Assynchronous
-     request.onload = reqListener;
-    //request.addEventListener("load", reqListener);
-
-    //Synchronous Working
-    // request.onreadystatechange = function () {
-    //     if (request.status >= 200 && request.status < 400) {
-    //         // Success!
-    //         var resp = request.responseText;
-    //         var respToString = JSON.stringify(resp);
-    //         //RESULT in Json
-    //         var respTojson = JSON.parse(respToString);
-    //     } else {
-    //         console.log('Error');
-    //     }
-    // };
-
-    request.onerror = function () {
-        console.log(request.statusText);
-    };
-
     request.send();
 }
+
+
 
 
 
