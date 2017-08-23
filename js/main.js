@@ -19,23 +19,22 @@
 //https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
 
 const progressBar = document.getElementById("progress-bar");
+const dictionary = [];
+dictionary.push({key: 1, value: "one"});
+dictionary.push({key: 2, value: "two"});
+dictionary.push({key: 3, value: "three"});
+dictionary.push({key: 4, value: "four"});
 
 window.onload = function (e) {
-    loadContent();
+    loadContent().then(r=>renderContent(r));
 }
 
 function loadContent() {
-
-    let myPromise = new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
         let dictionaryContent = [];
-        var dictionary = [];
-        dictionary.push({key: 1, value: "one"});
-        dictionary.push({key: 2, value: "two"});
-        dictionary.push({key: 3, value: "three"});
-        dictionary.push({key: 4, value: "four"});
 
         for (let i = 0; i < dictionary.length; i++) {
-            getContent(dictionary[i].value)
+            getContentPerBox(dictionary[i].value)
                 .then(r => {
                     dictionaryContent.push({key:dictionary[i].value, value:r});
                     if(dictionaryContent.length===4){
@@ -47,21 +46,9 @@ function loadContent() {
                 });
         }
     });
-
-    myPromise.then(r=>renderBoxes(r));
-
 }
 
-function renderBoxes(dictionaryContent){
-
-    for (var key in dictionaryContent) {
-        console.log(dictionaryContent[key].key +' '+dictionaryContent[key].value);
-        document.getElementsByClassName('box ' + dictionaryContent[key].key)[0].innerHTML = dictionaryContent[key].value;
-    }
-}
-
-
-function getContent(boxName) {
+function getContentPerBox(boxName) {
     return new Promise(function (resolve, reject) {
         makeRequest('http://jstest.getsandbox.com/' + boxName)
             .catch(function (error) {
@@ -74,6 +61,13 @@ function getContent(boxName) {
     });
 }
 
+function renderContent(dictionaryContent){
+    for (var key in dictionaryContent) {
+        console.log(dictionaryContent[key].key +' '+dictionaryContent[key].value);
+        document.getElementsByClassName('box ' + dictionaryContent[key].key)[0].innerHTML = dictionaryContent[key].value;
+    }
+}
+
 function readJson(resp) {
     //I am stringifing because i was having a non valid Json error
     var respToString = JSON.stringify(resp);
@@ -84,7 +78,7 @@ function readJson(resp) {
 }
 
 
-//Assynchronous
+//Asynchronous
 function requestProgress(e) {
     //console.log(e.lengthComputable);
 
@@ -122,7 +116,6 @@ function onLoadEnd(e) {
 
 
 }
-
 
 function makeRequest(url) {
     return new Promise(function (resolve, reject) {
