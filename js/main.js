@@ -12,8 +12,15 @@
 // Box four:  https://jstest.getsandbox.com/four
 //
 // The AJAX returns the following JSON structure: {"content": string}
-//const myUrl = 'http://jstest.getsandbox.com/one';
-//const myUrl='http://www.coincap.io/coins';
+
+//Good references
+//http://youmightnotneedjquery.com/
+//https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Synchronous_and_Asynchronous_Requests
+//https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+
+const DONE = 4;
+const SUCCESS = 200;
+const progressBar = document.getElementById("progress-bar");
 
 window.onload = function (e) {
     loadContent();
@@ -37,32 +44,76 @@ function myCallback(item) {
     var resp = this.responseText;
     //I am stringifing because i was having a non valid Json error
     var respToString = JSON.stringify(resp);
-    //RESULT in Json
+    //RESULT in Json. I am making double parsing as it seems there is a bug with the json.parse
     var respTojson = JSON.parse(JSON.parse(respToString));
-    console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
-
+    //console.log(' k:' + item.key + ' v:' + item.value + ' r:' + respTojson.content);
     document.getElementsByClassName('box ' + item.value)[0].innerHTML = respTojson.content;
-
 }
 
 
 //Assynchronous
-function requestSuccess() {
+function requestCompleted() {
     //console.log(this.arguments)
-    this.callback.apply(this, this.arguments);
+    if (this.readyState === DONE) {
+        if (this.status === SUCCESS) {
+            this.callback.apply(this, this.arguments);
+        }
+    }
 }
 
 function requestError() {
     console.log(this.statusText);
 }
 
+function requestProgress (e) {
+    //console.log(e.lengthComputable);
+
+    if (e.lengthComputable) {
+        progressBar.max = e.total;
+        progressBar.value = e.loaded;
+    }
+
+
+    //OPTION 1
+    // var contentLength;
+    // if (e.lengthComputable) {
+    //     contentLength = e.total;
+    // } else {
+    //     contentLength = e.target.getResponseHeader('x-decompressed-content-length');
+    // }
+    // console.log( contentLength);
+
+    //OPTION 1
+    // if (this.status === 200) {
+    //     var curLoadedMB = (e.loaded / 1024.0 / 1024.0).toFixed(2);
+    //     var totalMB = (e.total / 1024.0 / 1024.0).toFixed(2);
+    //     var result=((e.loaded / e.total) * 100);
+    //     console.log(result);
+    // }
+
+}
+
+function onLoadStart()
+{
+    progressBar.innerHTML = 0;
+}
+function onLoadEnd(e)
+{
+    progressBar.innerHTML = e.loaded;
+}
+
+
+
 function makeRequest(url, callback) {
 
     var request = new XMLHttpRequest();
     request.callback = callback;
     request.arguments = Array.prototype.slice.call(arguments, 2);
-    request.onload = requestSuccess;
+    request.onload = requestCompleted;
     request.onerror = requestError;
+    request.onprogress =requestProgress;
+    request.onloadstart = onLoadStart;
+    request.onloadend = onLoadEnd;
     request.open('GET', url, true);
     request.send();
 }
